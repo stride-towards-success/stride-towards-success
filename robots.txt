@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# TODO: 公開ドメイン確定後、下記を実ドメインに変更
+Sitemap: https://stride-towards-success.com/sitemap.xml
