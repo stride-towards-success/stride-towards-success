@@ -65,15 +65,38 @@
         <!-- Form + Info -->
         <section id="business" class="py-20 md:py-28 bg-white scroll-mt-24">
             <div class="max-w-3xl mx-auto px-6 lg:px-10">
-                <!-- Form CTA -->
-                <div class="bg-slate-50 border border-hair p-8 md:p-12 text-center">
-                    <h2 class="font-serif text-2xl font-bold text-ink mb-3">フォームからのお問い合わせ</h2>
-                    <p class="text-slate-600 leading-relaxed mb-8">以下のボタンから、お問い合わせフォームへお進みください。</p>
-                    <a href="YOUR_GOOGLE_FORM_URL_HERE" target="_blank" rel="noopener noreferrer" class="btn-primary text-lg">
-                        <i class="fab fa-google mr-3"></i> お問い合わせフォームへ
-                    </a>
-                    <p class="text-xs text-slate-400 mt-4">※ フォームは新しいタブで開きます。<span class="text-accent">（公開前にフォームURLの設定が必要です）</span></p>
-                </div>
+                <!-- お問い合わせフォーム -->
+                <form id="contactForm" class="bg-slate-50 border border-hair p-8 md:p-10">
+                    <h2 class="font-serif text-2xl font-bold text-ink mb-2 text-center">お問い合わせフォーム</h2>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-8 text-center">必要事項をご記入のうえ送信してください。担当者より追ってご連絡いたします。</p>
+                    <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
+                    <input type="hidden" name="subject" value="【STS】Webサイトからのお問い合わせ">
+                    <input type="hidden" name="from_name" value="STS お問い合わせフォーム">
+                    <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off">
+                    <div class="space-y-5">
+                        <div class="grid sm:grid-cols-2 gap-5">
+                            <label class="block"><span class="text-sm font-bold text-ink">お名前 <span class="text-accent">*</span></span>
+                                <input name="name" required autocomplete="name" class="mt-1.5 w-full bg-white border border-hair rounded-md px-4 py-3 text-slate-800 placeholder-slate-400 focus:border-accent focus:ring-1 focus:ring-accent outline-none" placeholder="山田 太郎"></label>
+                            <label class="block"><span class="text-sm font-bold text-ink">会社名（任意）</span>
+                                <input name="company" autocomplete="organization" class="mt-1.5 w-full bg-white border border-hair rounded-md px-4 py-3 text-slate-800 placeholder-slate-400 focus:border-accent focus:ring-1 focus:ring-accent outline-none" placeholder="株式会社〇〇"></label>
+                        </div>
+                        <label class="block"><span class="text-sm font-bold text-ink">メールアドレス <span class="text-accent">*</span></span>
+                            <input name="email" type="email" required autocomplete="email" class="mt-1.5 w-full bg-white border border-hair rounded-md px-4 py-3 text-slate-800 placeholder-slate-400 focus:border-accent focus:ring-1 focus:ring-accent outline-none" placeholder="you@example.com"></label>
+                        <label class="block"><span class="text-sm font-bold text-ink">お問い合わせ種別</span>
+                            <select name="category" class="mt-1.5 w-full bg-white border border-hair rounded-md px-4 py-3 text-slate-800 focus:border-accent focus:ring-1 focus:ring-accent outline-none">
+                                <option>事業のご相談（営業代行 / Web / AI導入）</option>
+                                <option>採用について</option>
+                                <option>その他</option>
+                            </select></label>
+                        <label class="block"><span class="text-sm font-bold text-ink">お問い合わせ内容 <span class="text-accent">*</span></span>
+                            <textarea name="message" required rows="5" class="mt-1.5 w-full bg-white border border-hair rounded-md px-4 py-3 text-slate-800 placeholder-slate-400 focus:border-accent focus:ring-1 focus:ring-accent outline-none" placeholder="ご相談内容をご記入ください。"></textarea></label>
+                        <label class="flex items-start gap-2 text-xs text-slate-500"><input type="checkbox" required class="mt-0.5 accent-accent w-4 h-4"> <span><a href="privacy.html" class="text-accent underline underline-offset-2" target="_blank" rel="noopener">プライバシーポリシー</a>に同意の上、送信します。</span></label>
+                    </div>
+                    <div class="text-center mt-7">
+                        <button type="submit" id="submitBtn" class="btn-primary text-lg px-10"><i class="fas fa-paper-plane mr-3 text-sm"></i>送信する</button>
+                    </div>
+                    <p id="formMsg" class="text-center text-sm mt-4"></p>
+                </form>
 
                 <!-- Direct contact -->
                 <div class="mt-12 border-t border-hair pt-12 grid sm:grid-cols-3 gap-8 text-center">
@@ -113,6 +136,36 @@
             <p class="text-xs opacity-50 mt-8">&copy; <span id="y"></span> 株式会社STS. All Rights Reserved.</p>
         </div>
     </footer>
-    <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+    <script>
+        document.getElementById('y').textContent = new Date().getFullYear();
+        (function(){
+            const cf = document.getElementById('contactForm'); if(!cf) return;
+            const msg = document.getElementById('formMsg'), btn = document.getElementById('submitBtn');
+            cf.addEventListener('submit', async function(e){
+                e.preventDefault();
+                const d = Object.fromEntries(new FormData(cf).entries());
+                const key = (cf.querySelector('[name=access_key]')||{}).value || '';
+                // キー未設定の間はメール送信にフォールバック（フォームは常に機能する）
+                if (key.indexOf('YOUR_') === 0 || !key) {
+                    const body = 'お名前: '+(d.name||'')+'\n会社名: '+(d.company||'')+'\nメール: '+(d.email||'')+'\n種別: '+(d.category||'')+'\n\n'+(d.message||'');
+                    window.location.href = 'mailto:info@stride-towards-success.com?subject='+encodeURIComponent('【STS】お問い合わせ')+'&body='+encodeURIComponent(body);
+                    msg.textContent = 'メールアプリが開きます。そのまま送信してください。';
+                    msg.className = 'text-center text-sm mt-4 text-accent font-bold';
+                    return;
+                }
+                btn.disabled = true; msg.textContent = '送信中…'; msg.className = 'text-center text-sm mt-4 text-slate-500';
+                try {
+                    const r = await fetch('https://api.web3forms.com/submit', { method:'POST', headers:{'Accept':'application/json'}, body: new FormData(cf) });
+                    const j = await r.json();
+                    if (j.success) { cf.reset(); msg.textContent = '送信しました。ありがとうございます。担当者よりご連絡いたします。'; msg.className = 'text-center text-sm mt-4 text-emerald-600 font-bold'; }
+                    else { throw new Error(j.message || 'failed'); }
+                } catch (err) {
+                    msg.textContent = '送信に失敗しました。お手数ですが info@stride-towards-success.com へ直接ご連絡ください。';
+                    msg.className = 'text-center text-sm mt-4 text-red-600';
+                }
+                btn.disabled = false;
+            });
+        })();
+    </script>
 </body>
 </html>
